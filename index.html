@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f0f2f5">
+<meta name="google-adsense-account" content="ca-pub-5080388241761388">
 <title>多边形基础底板钢筋量计算器</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5080388241761388"
+     crossorigin="anonymous"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root { color-scheme: light; }
@@ -127,21 +130,22 @@ svg text { font-family: -apple-system, "Microsoft YaHei", sans-serif; }
   </section>
 
   <section class="results-area" aria-label="计算结果">
-    <div class="summary-cards" id="summaryCards"><div class="panel">
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="ca-pub-5080388241761388"
-       data-ad-slot="广告位ID"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
-</div>
+    <div class="summary-cards" id="summaryCards">
       <div class="card"><div class="label">总根数</div><div class="value" id="totalCount">-</div><div class="unit">根</div></div>
       <div class="card"><div class="label">总长度</div><div class="value" id="totalLength">-</div><div class="unit">m</div></div>
       <div class="card highlight"><div class="label">总重量</div><div class="value" id="totalWeight">-</div><div class="unit">kg</div></div>
     </div>
+    <section class="panel" aria-label="广告">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-5080388241761388"
+           data-ad-slot="6713291468"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </section>
     <section class="panel">
       <h2>分方向汇总</h2>
       <div class="table-scroll"><table class="dir-table" id="dirTable">
@@ -169,7 +173,7 @@ function renderVertices() {
   const tbody = document.getElementById('vertexBody'); tbody.innerHTML = '';
   vertices.forEach((v, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="width:28px;color:#999;font-size:12px;">${i+1}</td><td><input aria-label="顶点 ${i+1} X 坐标" type="number" step="0.01" value="${v[0]}" onchange="updateVertex(${i},0,this.value)"></td><td><input aria-label="顶点 ${i+1} Y 坐标" type="number" step="0.01" value="${v[1]}" onchange="updateVertex(${i},1,this.value)"></td><td><button class="del-btn" onclick="removeVertex(${i})" title="删除顶点 ${i+1}" aria-label="删除顶点 ${i+1}">×</button></td>`;
+    tr.innerHTML = `<td style="width:28px;color:#999;font-size:12px;">${i+1}</td><td><input aria-label="顶点 ${i+1} X 坐标" type="number" step="0.01" value="${v[0]}" onchange="updateVertex(${i},0,this.value)"></td><td><input aria-label="顶点 ${i+1} Y 坐标" type="number" step="0.01" value="${v[1]}" onchange="updateVertex(${i},1,this.value)"></td><td><button class="del-btn" aria-label="删除顶点 ${i+1}" onclick="removeVertex(${i})">×</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -197,31 +201,29 @@ function calcDirection(poly,direction,cover,anchor,spacing) {
 }
 function calculate() {
   const errEl=document.getElementById('errorMsg');errEl.style.display='none';
-  const cover=parseFloat(document.getElementById('cover').value)/1000,dia=parseFloat(document.getElementById('rebarDia').value)/1000,spacing=parseFloat(document.getElementById('rebarSpacing').value)/1000,anchorFactor=parseFloat(document.getElementById('anchorFactor').value),layers=parseInt(document.getElementById('layers').value),anchor=anchorFactor*dia,density=dia*dia*1000*1000*.00617;
-  if(!Number.isFinite(cover)||!Number.isFinite(dia)||!Number.isFinite(spacing)||!Number.isFinite(anchorFactor)||!Number.isFinite(layers)||cover<=0||dia<=0||spacing<=0||anchorFactor<0||layers<1){errEl.textContent='参数错误：请检查各参数';errEl.style.display='block';return;}
+  const cover=parseFloat(document.getElementById('cover').value)/1000,dia=parseFloat(document.getElementById('rebarDia').value)/1000,spacing=parseFloat(document.getElementById('rebarSpacing').value)/1000,anchorFactor=parseFloat(document.getElementById('anchorFactor').value),layers=parseInt(document.getElementById('layers').value,10),anchor=anchorFactor*dia;
+  if(!Number.isFinite(cover)||!Number.isFinite(dia)||!Number.isFinite(spacing)||!Number.isFinite(anchorFactor)||!Number.isFinite(layers)||cover<=0||dia<=0||spacing<=0||anchorFactor<0||layers<1){errEl.textContent='请输入有效的正数参数';errEl.style.display='block';return;}
   if(vertices.length<3){errEl.textContent='顶点数不足，至少需要 3 个顶点';errEl.style.display='block';return;}
-  const xDetails=calcDirection(vertices,'X',cover,anchor,spacing),yDetails=calcDirection(vertices,'Y',cover,anchor,spacing),xLenPerLayer=xDetails.reduce((s,d)=>s+d.length,0),yLenPerLayer=yDetails.reduce((s,d)=>s+d.length,0),xLenTotal=xLenPerLayer*layers,yLenTotal=yLenPerLayer*layers,grandTotal=xLenTotal+yLenTotal,grandWeight=grandTotal*density,grandCount=(xDetails.length+yDetails.length)*layers;
-  document.getElementById('totalCount').textContent=grandCount;document.getElementById('totalLength').textContent=grandTotal.toFixed(2);document.getElementById('totalWeight').textContent=grandWeight.toFixed(1);
-  document.getElementById('dirTableBody').innerHTML=`<tr><td>X 向（水平）</td><td>${xDetails.length}</td><td>${xLenPerLayer.toFixed(2)} m</td><td>${xLenTotal.toFixed(2)} m</td><td>${(xLenTotal*density).toFixed(1)} kg</td></tr><tr><td>Y 向（竖直）</td><td>${yDetails.length}</td><td>${yLenPerLayer.toFixed(2)} m</td><td>${yLenTotal.toFixed(2)} m</td><td>${(yLenTotal*density).toFixed(1)} kg</td></tr><tr class="total-row"><td>合计</td><td>${grandCount}</td><td>${(xLenPerLayer+yLenPerLayer).toFixed(2)} m</td><td>${grandTotal.toFixed(2)} m</td><td>${grandWeight.toFixed(1)} kg</td></tr>`;
+  const xDetails=calcDirection(vertices,'X',cover,anchor,spacing),yDetails=calcDirection(vertices,'Y',cover,anchor,spacing),xLenPerLayer=xDetails.reduce((s,d)=>s+d.length,0),yLenPerLayer=yDetails.reduce((s,d)=>s+d.length,0);
+  const xLenTotal=xLenPerLayer*layers,yLenTotal=yLenPerLayer*layers,grandTotal=xLenTotal+yLenTotal,grandCount=(xDetails.length+yDetails.length)*layers,unitWeight=Math.PI*(dia*dia)/4*7850,grandWeight=grandTotal*unitWeight;
+  document.getElementById('totalCount').textContent=grandCount;document.getElementById('totalLength').textContent=grandTotal.toFixed(2);document.getElementById('totalWeight').textContent=grandWeight.toFixed(2);
+  document.getElementById('dirTableBody').innerHTML=`<tr><td>X 向（水平）</td><td>${xDetails.length}</td><td>${xLenPerLayer.toFixed(2)} m</td><td>${xLenTotal.toFixed(2)} m</td><td>${(xLenTotal*unitWeight).toFixed(2)} kg</td></tr><tr><td>Y 向（竖直）</td><td>${yDetails.length}</td><td>${yLenPerLayer.toFixed(2)} m</td><td>${yLenTotal.toFixed(2)} m</td><td>${(yLenTotal*unitWeight).toFixed(2)} kg</td></tr><tr class="total-row"><td>合计</td><td>${grandCount}</td><td>${(xLenPerLayer+yLenPerLayer).toFixed(2)} m</td><td>${grandTotal.toFixed(2)} m</td><td>${grandWeight.toFixed(2)} kg</td></tr>`;
   document.getElementById('detailPanel').style.display='block';
   document.getElementById('xDetailBody').innerHTML=xDetails.map((d,i)=>`<tr><td>${i+1}</td><td>${d.pos.toFixed(3)}</td><td>${d.span.toFixed(3)}</td><td>${d.length.toFixed(3)}</td></tr>`).join('');
   document.getElementById('yDetailBody').innerHTML=yDetails.map((d,i)=>`<tr><td>${i+1}</td><td>${d.pos.toFixed(3)}</td><td>${d.span.toFixed(3)}</td><td>${d.length.toFixed(3)}</td></tr>`).join('');
   drawSVG(vertices,xDetails,yDetails);
 }
 function drawSVG(poly,xDetails,yDetails) {
-  const svg=document.getElementById('rebarSvg'),xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]),xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys),W=580,H=380,pad=40,scale=Math.min((W-2*pad)/(xmax-xmin||1),(H-2*pad)/(ymax-ymin||1)),ox=pad+(W-2*pad-(xmax-xmin)*scale)/2,oy=pad+(H-2*pad-(ymax-ymin)*scale)/2;
+  const svg=document.getElementById('rebarSvg'),xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]),xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys),W=580,H=380,pad=40,scale=Math.min((W-2*pad)/(xmax-xmin),(H-2*pad)/(ymax-ymin)),ox=(W-(xmax-xmin)*scale)/2,oy=(H-(ymax-ymin)*scale)/2;
   const tx=x=>ox+(x-xmin)*scale,ty=y=>H-oy-(y-ymin)*scale;let html='';
   html+=`<polygon points="${poly.map(p=>`${tx(p[0])},${ty(p[1])}`).join(' ')}" fill="rgba(74,144,217,0.08)" stroke="#4a90d9" stroke-width="2"/>`;
   xDetails.forEach(d=>hlineIntersections(poly,d.pos).forEach(([a,b])=>html+=`<line x1="${tx(a)}" y1="${ty(d.pos)}" x2="${tx(b)}" y2="${ty(d.pos)}" stroke="rgba(255,77,79,0.5)" stroke-width="1"/>`));
   yDetails.forEach(d=>vlineIntersections(poly,d.pos).forEach(([a,b])=>html+=`<line x1="${tx(d.pos)}" y1="${ty(a)}" x2="${tx(d.pos)}" y2="${ty(b)}" stroke="rgba(82,196,26,0.5)" stroke-width="1"/>`));
   poly.forEach((p,i)=>{html+=`<circle cx="${tx(p[0])}" cy="${ty(p[1])}" r="3" fill="#4a90d9"/><text x="${tx(p[0])+(i%2===0?6:-18)}" y="${ty(p[1])+(i%3===0?-6:12)}" font-size="10" fill="#666">${i+1}</text>`;});
-  html+=`<rect x="${W-150}" y="${H-50}" width="140" height="40" fill="#fff" stroke="#eee" rx="4"/><line x1="${W-140}" y1="${H-38}" x2="${W-110}" y2="${H-38}" stroke="rgba(255,77,79,0.7)" stroke-width="2"/><text x="${W-105}" y="${H-34}" font-size="11" fill="#555">X 向钢筋</text><line x1="${W-140}" y1="${H-20}" x2="${W-110}" y2="${H-20}" stroke="rgba(82,196,26,0.7)" stroke-width="2"/><text x="${W-105}" y="${H-16}" font-size="11" fill="#555">Y 向钢筋</text>`;
+  html+=`<rect x="${W-150}" y="${H-50}" width="140" height="40" fill="#fff" stroke="#eee" rx="4"/><line x1="${W-140}" y1="${H-38}" x2="${W-110}" y2="${H-38}" stroke="rgba(255,77,79,0.7)" stroke-width="2"/><text x="${W-104}" y="${H-34}" font-size="10" fill="#666">X 向</text><line x1="${W-70}" y1="${H-38}" x2="${W-70}" y2="${H-18}" stroke="rgba(82,196,26,0.7)" stroke-width="2"/><text x="${W-64}" y="${H-34}" font-size="10" fill="#666">Y 向</text>`;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=html;
 }
 renderVertices();calculate();
 </script>
 </body>
 </html>
-<script async
-  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5080388241761388"
-  crossorigin="anonymous"></script>
