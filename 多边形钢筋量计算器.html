@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多边形基础底板钢筋量计算器</title>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  min-height: 100vh;
+  padding: 24px;
+}
+h1 {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1a1a2e;
+}
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 24px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .container { grid-template-columns: 1fr; }
+}
+.panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.panel h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+.param-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.param-item label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 3px;
+}
+.param-item input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: border-color .2s;
+}
+.param-item input:focus {
+  outline: none;
+  border-color: #4a90d9;
+}
+.vertex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.vertex-header span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+}
+.btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-primary {
+  background: #4a90d9;
+  color: #fff;
+}
+.btn-primary:hover { background: #3a7bc8; }
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.btn-danger {
+  background: #ff4d4f;
+  color: #fff;
+}
+.btn-danger:hover { background: #e04345; }
+.btn-outline {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #555;
+}
+.btn-outline:hover { background: #f5f5f5; }
+.vertex-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+.vertex-table th {
+  font-size: 11px;
+  color: #999;
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid #eee;
+}
+.vertex-table td {
+  padding: 3px 4px;
+}
+.vertex-table input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.vertex-table input:focus {
+  outline: none;
+  border-color: #4a90d9;
+}
+.vertex-table .del-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #fff1f0;
+  color: #ff4d4f;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: center;
+}
+.vertex-table .del-btn:hover { background: #ffccc7; }
+.calc-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background: #4a90d9;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.calc-btn:hover { background: #3a7bc8; }
+.results-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .summary-cards { grid-template-columns: 1fr; }
+}
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  text-align: center;
+}
+.card .label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+}
+.card .value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+.card .unit {
+  font-size: 12px;
+  color: #999;
+}
+.card.highlight {
+  background: linear-gradient(135deg, #4a90d9, #357abd);
+  color: #fff;
+}
+.card.highlight .label { color: rgba(255,255,255,0.8); }
+.card.highlight .value { color: #fff; }
+.card.highlight .unit { color: rgba(255,255,255,0.7); }
+.dir-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.dir-table th {
+  background: #f8f9fa;
+  padding: 8px 10px;
+  text-align: right;
+  font-weight: 500;
+  color: #555;
+  border-bottom: 1px solid #eee;
+}
+.dir-table th:first-child { text-align: left; }
+.dir-table td {
+  padding: 7px 10px;
+  text-align: right;
+  border-bottom: 1px solid #f5f5f5;
+}
+.dir-table td:first-child { text-align: left; font-weight: 500; }
+.dir-table tr:last-child td { border-bottom: none; }
+.dir-table .total-row {
+  background: #f0f7ff;
+  font-weight: 600;
+}
+.detail-section {
+  margin-top: 12px;
+}
+.detail-section h3 {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 8px;
+}
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.detail-table th {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  padding: 6px 8px;
+  text-align: right;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+.detail-table th:first-child { text-align: left; }
+.detail-table td {
+  padding: 5px 8px;
+  text-align: right;
+  border-bottom: 1px solid #f5f5f5;
+  color: #444;
+}
+.detail-table td:first-child { text-align: left; color: #999; }
+.svg-container {
+  background: #fafbfc;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+  overflow: auto;
+}
+svg text {
+  font-family: -apple-system, "Microsoft YaHei", sans-serif;
+}
+.error-msg {
+  color: #ff4d4f;
+  font-size: 13px;
+  padding: 10px;
+  background: #fff1f0;
+  border-radius: 6px;
+  margin-top: 10px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<h1>多边形基础底板钢筋量计算器</h1>
+<p class="subtitle">支持任意正交多边形 · 双层双向配筋 · 射线法逐根计算</p>
+
+<!-- 顶部广告位 -->
+<div style="max-width:1200px;margin:0 auto 16px;text-align:center;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+       data-ad-slot="1234567890"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+</div>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+<div class="container">
+  <!-- 左侧：输入区 -->
+  <div class="panel">
+    <h2>基础参数</h2>
+    <div class="param-grid">
+      <div class="param-item">
+        <label>板厚 (mm)</label>
+        <input type="number" id="slabThick" value="200" min="100" max="2000">
+      </div>
+      <div class="param-item">
+        <label>钢筋直径 (mm)</label>
+        <input type="number" id="rebarDia" value="12" min="6" max="40">
+      </div>
+      <div class="param-item">
+        <label>钢筋间距 (mm)</label>
+        <input type="number" id="rebarSpacing" value="200" min="100" max="500">
+      </div>
+      <div class="param-item">
+        <label>保护层 (mm)</label>
+        <input type="number" id="cover" value="40" min="15" max="80">
+      </div>
+      <div class="param-item">
+        <label>锚固倍数 (×d)</label>
+        <input type="number" id="anchorFactor" value="20" min="0" max="50">
+      </div>
+      <div class="param-item">
+        <label>层数</label>
+        <input type="number" id="layers" value="2" min="1" max="4">
+      </div>
+    </div>
+
+    <h2>顶点坐标 (m)</h2>
+    <div class="vertex-header">
+      <span>按顺序输入，首尾自动闭合</span>
+      <button class="btn btn-sm btn-outline" onclick="addVertex()">+ 添加顶点</button>
+    </div>
+    <table class="vertex-table">
+      <thead>
+        <tr><th>#</th><th>X</th><th>Y</th><th></th></tr>
+      </thead>
+      <tbody id="vertexBody"></tbody>
+    </table>
+    <button class="calc-btn" onclick="calculate()">计 算</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- 右侧：结果区 -->
+  <div class="results-area">
+    <div class="summary-cards" id="summaryCards">
+      <div class="card">
+        <div class="label">总根数</div>
+        <div class="value" id="totalCount">-</div>
+        <div class="unit">根</div>
+      </div>
+      <div class="card">
+        <div class="label">总长度</div>
+        <div class="value" id="totalLength">-</div>
+        <div class="unit">m</div>
+      </div>
+      <div class="card highlight">
+        <div class="label">总重量</div>
+        <div class="value" id="totalWeight">-</div>
+        <div class="unit">kg</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>分方向汇总</h2>
+      <table class="dir-table" id="dirTable">
+        <thead>
+          <tr><th>方向</th><th>根数(每层)</th><th>总长(每层)</th><th>总长(全部)</th><th>重量</th></tr>
+        </thead>
+        <tbody id="dirTableBody">
+          <tr><td colspan="5" style="text-align:center;color:#999;padding:20px;">点击"计算"查看结果</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>钢筋布置示意</h2>
+      <div class="svg-container" id="svgContainer">
+        <svg id="rebarSvg" width="100%" height="400" viewBox="0 0 600 400"></svg>
+      </div>
+    </div>
+
+    <div class="panel detail-section" id="detailPanel" style="display:none;">
+      <h3>X 向钢筋明细（水平方向，沿 Y 布置）</h3>
+      <table class="detail-table">
+        <thead><tr><th>#</th><th>Y 位置 (m)</th><th>板宽 (m)</th><th>单根长 (m)</th></tr></thead>
+        <tbody id="xDetailBody"></tbody>
+      </table>
+      <h3 style="margin-top:16px;">Y 向钢筋明细（竖直方向，沿 X 布置）</h3>
+      <table class="detail-table">
+        <thead><tr><th>#</th><th>X 位置 (m)</th><th>板高 (m)</th><th>单根长 (m)</th></tr></thead>
+        <tbody id="yDetailBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 底部广告位 -->
+<div style="max-width:1200px;margin:20px auto 0;text-align:center;padding:0 24px;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+       data-ad-slot="1234567890"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+</div>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+<script>
+// ==================== 默认顶点 ====================
+const defaultVertices = [
+  [0, 0], [0, 7.03], [2.21, 7.03], [2.21, 9.91], [4.32, 9.91],
+  [4.32, 8.26], [5.91, 8.26], [5.91, 5.86], [2.85, 5.86], [2.85, 0]
+];
+
+let vertices = defaultVertices.map(v => [...v]);
+
+// ==================== 顶点输入管理 ====================
+function renderVertices() {
+  const tbody = document.getElementById('vertexBody');
+  tbody.innerHTML = '';
+  vertices.forEach((v, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="width:28px;color:#999;font-size:12px;">${i + 1}</td>
+      <td><input type="number" step="0.01" value="${v[0]}" onchange="updateVertex(${i},0,this.value)"></td>
+      <td><input type="number" step="0.01" value="${v[1]}" onchange="updateVertex(${i},1,this.value)"></td>
+      <td><button class="del-btn" onclick="removeVertex(${i})" title="删除">×</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateVertex(i, axis, val) {
+  vertices[i][axis] = parseFloat(val) || 0;
+}
+
+function addVertex() {
+  vertices.push([0, 0]);
+  renderVertices();
+}
+
+function removeVertex(i) {
+  if (vertices.length <= 3) return;
+  vertices.splice(i, 1);
+  renderVertices();
+}
+
+// ==================== 核心计算（射线法） ====================
+function hlineIntersections(poly, y) {
+  const pts = [];
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = poly[i];
+    const [x2, y2] = poly[(i + 1) % n];
+    if ((y1 > y) !== (y2 > y)) {
+      const t = (y - y1) / (y2 - y1);
+      pts.push(x1 + t * (x2 - x1));
+    }
+  }
+  pts.sort((a, b) => a - b);
+  const segs = [];
+  for (let j = 0; j < pts.length - 1; j += 2) {
+    segs.push([pts[j], pts[j + 1]]);
+  }
+  return segs;
+}
+
+function vlineIntersections(poly, x) {
+  const pts = [];
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = poly[i];
+    const [x2, y2] = poly[(i + 1) % n];
+    if ((x1 > x) !== (x2 > x)) {
+      const t = (x - x1) / (x2 - x1);
+      pts.push(y1 + t * (y2 - y1));
+    }
+  }
+  pts.sort((a, b) => a - b);
+  const segs = [];
+  for (let j = 0; j < pts.length - 1; j += 2) {
+    segs.push([pts[j], pts[j + 1]]);
+  }
+  return segs;
+}
+
+function calcDirection(poly, direction, cover, anchor, spacing) {
+  const xs = poly.map(p => p[0]);
+  const ys = poly.map(p => p[1]);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+
+  const details = [];
+  if (direction === 'X') {
+    for (let y = ymin + cover; y <= ymax - cover + 1e-9; y += spacing) {
+      const segs = hlineIntersections(poly, y);
+      if (segs.length > 0) {
+        const gross = segs.reduce((s, [a, b]) => s + (b - a), 0);
+        const net = gross - 2 * cover + 2 * anchor;
+        if (net > 0.001) details.push({ pos: y, span: gross, length: net });
+      }
+    }
+  } else {
+    for (let x = xmin + cover; x <= xmax - cover + 1e-9; x += spacing) {
+      const segs = vlineIntersections(poly, x);
+      if (segs.length > 0) {
+        const gross = segs.reduce((s, [a, b]) => s + (b - a), 0);
+        const net = gross - 2 * cover + 2 * anchor;
+        if (net > 0.001) details.push({ pos: x, span: gross, length: net });
+      }
+    }
+  }
+  return details;
+}
+
+// ==================== 主计算 ====================
+function calculate() {
+  const errEl = document.getElementById('errorMsg');
+  errEl.style.display = 'none';
+
+  // 读取参数
+  const cover = parseFloat(document.getElementById('cover').value) / 1000;
+  const dia = parseFloat(document.getElementById('rebarDia').value) / 1000;
+  const spacing = parseFloat(document.getElementById('rebarSpacing').value) / 1000;
+  const anchorFactor = parseFloat(document.getElementById('anchorFactor').value);
+  const layers = parseInt(document.getElementById('layers').value);
+  const anchor = anchorFactor * dia;
+  const density = dia * dia * 1000 * 1000 * 0.00617; // kg/m
+
+  if (cover <= 0 || dia <= 0 || spacing <= 0 || layers < 1) {
+    errEl.textContent = '参数错误：请检查各参数是否为正数';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (vertices.length < 3) {
+    errEl.textContent = '顶点数不足，至少需要 3 个顶点';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // 计算
+  const xDetails = calcDirection(vertices, 'X', cover, anchor, spacing);
+  const yDetails = calcDirection(vertices, 'Y', cover, anchor, spacing);
+
+  const xLenPerLayer = xDetails.reduce((s, d) => s + d.length, 0);
+  const yLenPerLayer = yDetails.reduce((s, d) => s + d.length, 0);
+  const xLenTotal = xLenPerLayer * layers;
+  const yLenTotal = yLenPerLayer * layers;
+  const grandTotal = xLenTotal + yLenTotal;
+  const grandWeight = grandTotal * density;
+  const grandCount = (xDetails.length + yDetails.length) * layers;
+
+  // 更新汇总卡片
+  document.getElementById('totalCount').textContent = grandCount;
+  document.getElementById('totalLength').textContent = grandTotal.toFixed(2);
+  document.getElementById('totalWeight').textContent = grandWeight.toFixed(1);
+
+  // 更新分方向表
+  const dirBody = document.getElementById('dirTableBody');
+  dirBody.innerHTML = `
+    <tr>
+      <td>X 向（水平）</td>
+      <td>${xDetails.length}</td>
+      <td>${xLenPerLayer.toFixed(2)} m</td>
+      <td>${xLenTotal.toFixed(2)} m</td>
+      <td>${(xLenTotal * density).toFixed(1)} kg</td>
+    </tr>
+    <tr>
+      <td>Y 向（竖直）</td>
+      <td>${yDetails.length}</td>
+      <td>${yLenPerLayer.toFixed(2)} m</td>
+      <td>${yLenTotal.toFixed(2)} m</td>
+      <td>${(yLenTotal * density).toFixed(1)} kg</td>
+    </tr>
+    <tr class="total-row">
+      <td>合计</td>
+      <td>${grandCount}</td>
+      <td>${(xLenPerLayer + yLenPerLayer).toFixed(2)} m</td>
+      <td>${grandTotal.toFixed(2)} m</td>
+      <td>${grandWeight.toFixed(1)} kg</td>
+    </tr>
+  `;
+
+  // 更新明细表
+  document.getElementById('detailPanel').style.display = 'block';
+  const xBody = document.getElementById('xDetailBody');
+  xBody.innerHTML = xDetails.map((d, i) =>
+    `<tr><td>${i + 1}</td><td>${d.pos.toFixed(3)}</td><td>${d.span.toFixed(3)}</td><td>${d.length.toFixed(3)}</td></tr>`
+  ).join('');
+
+  const yBody = document.getElementById('yDetailBody');
+  yBody.innerHTML = yDetails.map((d, i) =>
+    `<tr><td>${i + 1}</td><td>${d.pos.toFixed(3)}</td><td>${d.span.toFixed(3)}</td><td>${d.length.toFixed(3)}</td></tr>`
+  ).join('');
+
+  // 绘制 SVG
+  drawSVG(vertices, xDetails, yDetails, cover, anchor, spacing);
+}
+
+// ==================== SVG 可视化 ====================
+function drawSVG(poly, xDetails, yDetails, cover, anchor, spacing) {
+  const svg = document.getElementById('rebarSvg');
+  const xs = poly.map(p => p[0]);
+  const ys = poly.map(p => p[1]);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+
+  const W = 580, H = 380;
+  const pad = 40;
+  const scaleX = (W - 2 * pad) / (xmax - xmin || 1);
+  const scaleY = (H - 2 * pad) / (ymax - ymin || 1);
+  const scale = Math.min(scaleX, scaleY);
+
+  const ox = pad + (W - 2 * pad - (xmax - xmin) * scale) / 2;
+  const oy = pad + (H - 2 * pad - (ymax - ymin) * scale) / 2;
+
+  function tx(x) { return ox + (x - xmin) * scale; }
+  function ty(y) { return H - oy - (y - ymin) * scale; }
+
+  let html = '';
+
+  // 多边形填充
+  const polyStr = poly.map(p => `${tx(p[0])},${ty(p[1])}`).join(' ');
+  html += `<polygon points="${polyStr}" fill="rgba(74,144,217,0.08)" stroke="#4a90d9" stroke-width="2"/>`;
+
+  // X 向钢筋（水平线）
+  xDetails.forEach(d => {
+    const segs = hlineIntersections(poly, d.pos);
+    segs.forEach(([a, b]) => {
+      html += `<line x1="${tx(a)}" y1="${ty(d.pos)}" x2="${tx(b)}" y2="${ty(d.pos)}" stroke="rgba(255,77,79,0.5)" stroke-width="1"/>`;
+    });
+  });
+
+  // Y 向钢筋（垂直线）
+  yDetails.forEach(d => {
+    const segs = vlineIntersections(poly, d.pos);
+    segs.forEach(([a, b]) => {
+      html += `<line x1="${tx(d.pos)}" y1="${ty(a)}" x2="${tx(d.pos)}" y2="${ty(b)}" stroke="rgba(82,196,26,0.5)" stroke-width="1"/>`;
+    });
+  });
+
+  // 顶点标注
+  poly.forEach((p, i) => {
+    html += `<circle cx="${tx(p[0])}" cy="${ty(p[1])}" r="3" fill="#4a90d9"/>`;
+    const dx = i % 2 === 0 ? 6 : -18;
+    const dy = i % 3 === 0 ? -6 : 12;
+    html += `<text x="${tx(p[0]) + dx}" y="${ty(p[1]) + dy}" font-size="10" fill="#666">${i + 1}</text>`;
+  });
+
+  // 图例
+  html += `<rect x="${W - 150}" y="${H - 50}" width="140" height="40" fill="#fff" stroke="#eee" rx="4"/>`;
+  html += `<line x1="${W - 140}" y1="${H - 38}" x2="${W - 110}" y2="${H - 38}" stroke="rgba(255,77,79,0.7)" stroke-width="2"/>`;
+  html += `<text x="${W - 105}" y="${H - 34}" font-size="11" fill="#555">X 向钢筋</text>`;
+  html += `<line x1="${W - 140}" y1="${H - 20}" x2="${W - 110}" y2="${H - 20}" stroke="rgba(82,196,26,0.7)" stroke-width="2"/>`;
+  html += `<text x="${W - 105}" y="${H - 16}" font-size="11" fill="#555">Y 向钢筋</text>`;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = html;
+}
+
+// ==================== 初始化 ====================
+renderVertices();
+calculate();
+</script>
+</body>
+</html>
